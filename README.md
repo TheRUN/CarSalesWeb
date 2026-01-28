@@ -323,11 +323,18 @@ You can create a seller account by registering through the frontend.
 ### Security Features
 - JWT token-based authentication
 - Password hashing with bcrypt (10 rounds)
-- Protected API routes
-- Role-based access control
+- Protected API routes with middleware
+- Role-based access control (Admin/Seller)
 - Input validation using express-validator
-- SQL injection prevention with parameterized queries
-- CORS configuration
+- SQL injection prevention with parameterized queries and whitelist validation
+- CORS configuration for cross-origin requests
+- Rate limiting on all API endpoints:
+  - General API: 100 requests per 15 minutes per IP
+  - Authentication endpoints: 5 attempts per 15 minutes per IP
+  - Create/Update operations: 20 requests per 15 minutes per IP
+- Proper authorization checks on all protected resources
+- Secure file upload handling with type and size validation
+- Error handling to prevent information leakage
 
 ## Development
 
