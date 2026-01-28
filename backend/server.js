@@ -3,12 +3,17 @@ const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
 
+const { apiLimiter } = require('./middleware/rateLimiter');
+
 const app = express();
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Apply general rate limiting to all API routes
+app.use('/api/', apiLimiter);
 
 // Serve uploaded files statically
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

@@ -3,6 +3,7 @@ const router = express.Router();
 const { body } = require('express-validator');
 const adminController = require('../controllers/adminController');
 const { authMiddleware, adminMiddleware } = require('../middleware/auth');
+const { createLimiter } = require('../middleware/rateLimiter');
 
 // All routes require admin authentication
 router.use(authMiddleware);
@@ -10,13 +11,13 @@ router.use(adminMiddleware);
 
 // User management
 router.get('/users', adminController.getAllUsers);
-router.put('/users/:id/status', [
+router.put('/users/:id/status', createLimiter, [
     body('status').isIn(['active', 'disabled']).withMessage('Invalid status')
 ], adminController.updateUserStatus);
 router.delete('/users/:id', adminController.deleteUser);
 
 // Car management
-router.put('/cars/:id/status', [
+router.put('/cars/:id/status', createLimiter, [
     body('status').isIn(['pending', 'approved', 'rejected']).withMessage('Invalid status')
 ], adminController.updateCarStatus);
 

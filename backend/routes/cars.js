@@ -3,6 +3,7 @@ const router = express.Router();
 const { body } = require('express-validator');
 const carController = require('../controllers/carController');
 const { authMiddleware, sellerMiddleware } = require('../middleware/auth');
+const { createLimiter } = require('../middleware/rateLimiter');
 const upload = require('../config/upload');
 
 // Public routes
@@ -11,8 +12,8 @@ router.get('/makes', carController.getMakes);
 router.get('/body-types', carController.getBodyTypes);
 router.get('/:id', carController.getCarById);
 
-// Protected routes (sellers and admins)
-router.post('/', authMiddleware, sellerMiddleware, upload.array('images', 10), [
+// Protected routes (sellers and admins) with rate limiting
+router.post('/', authMiddleware, sellerMiddleware, createLimiter, upload.array('images', 10), [
     body('make').trim().notEmpty().withMessage('Make is required'),
     body('model').trim().notEmpty().withMessage('Model is required'),
     body('year').isInt({ min: 1900, max: new Date().getFullYear() + 1 }).withMessage('Invalid year'),
@@ -24,7 +25,7 @@ router.post('/', authMiddleware, sellerMiddleware, upload.array('images', 10), [
 
 router.get('/seller/my-cars', authMiddleware, sellerMiddleware, carController.getMyCars);
 
-router.put('/:id', authMiddleware, sellerMiddleware, upload.array('images', 10), [
+router.put('/:id', authMiddleware, sellerMiddleware, createLimiter, upload.array('images', 10), [
     body('make').trim().notEmpty().withMessage('Make is required'),
     body('model').trim().notEmpty().withMessage('Model is required'),
     body('year').isInt({ min: 1900, max: new Date().getFullYear() + 1 }).withMessage('Invalid year'),

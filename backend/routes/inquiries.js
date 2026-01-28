@@ -3,9 +3,10 @@ const router = express.Router();
 const { body } = require('express-validator');
 const inquiryController = require('../controllers/inquiryController');
 const { authMiddleware, adminMiddleware } = require('../middleware/auth');
+const { createLimiter } = require('../middleware/rateLimiter');
 
-// Public route - submit inquiry
-router.post('/', [
+// Public route - submit inquiry with rate limiting
+router.post('/', createLimiter, [
     body('car_id').isInt().withMessage('Valid car ID is required'),
     body('name').trim().notEmpty().withMessage('Name is required'),
     body('email').isEmail().normalizeEmail().withMessage('Invalid email address'),
