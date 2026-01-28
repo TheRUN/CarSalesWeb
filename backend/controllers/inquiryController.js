@@ -84,6 +84,11 @@ exports.deleteInquiry = async (req, res) => {
             return res.status(404).json({ error: 'Inquiry not found' });
         }
 
+        // Check if user owns the car or is admin
+        if (req.user.role !== 'admin' && inquiry.seller_id !== req.user.id) {
+            return res.status(403).json({ error: 'Access denied' });
+        }
+
         const deleted = await Inquiry.delete(req.params.id);
         if (!deleted) {
             return res.status(500).json({ error: 'Failed to delete inquiry' });

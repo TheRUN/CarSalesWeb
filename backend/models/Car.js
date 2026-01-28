@@ -100,9 +100,10 @@ class Car {
             params.push(searchTerm, searchTerm, searchTerm);
         }
 
-        // Sorting
-        const sortBy = filters.sortBy || 'created_at';
-        const sortOrder = filters.sortOrder || 'DESC';
+        // Sorting - validate sortBy to prevent SQL injection
+        const allowedSortFields = ['created_at', 'price', 'year', 'mileage', 'make', 'model'];
+        const sortBy = allowedSortFields.includes(filters.sortBy) ? filters.sortBy : 'created_at';
+        const sortOrder = (filters.sortOrder === 'ASC' || filters.sortOrder === 'DESC') ? filters.sortOrder : 'DESC';
         query += ` ORDER BY c.${sortBy} ${sortOrder}`;
 
         const [rows] = await db.execute(query, params);

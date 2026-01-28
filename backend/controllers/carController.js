@@ -48,8 +48,9 @@ exports.getAllCars = async (req, res) => {
             sortOrder: req.query.sortOrder
         };
 
-        // For non-admin users, only show approved cars
-        if (!req.user || req.user.role !== 'admin') {
+        // For non-authenticated or non-admin users, only show approved cars
+        const isAdmin = req.user && req.user.role === 'admin';
+        if (!isAdmin) {
             filters.status = 'approved';
         }
 
@@ -70,7 +71,11 @@ exports.getCarById = async (req, res) => {
 
         // Check permissions for non-approved cars
         if (car.status !== 'approved') {
-            if (!req.user || (req.user.role !== 'admin' && req.user.id !== car.seller_id)) {
+            const isAuthenticated = req.user !== undefined;
+            const isAdmin = isAuthenticated && req.user.role === 'admin';
+            const isOwner = isAuthenticated && req.user.id === car.seller_id;
+            
+            if (!isAdmin && !isOwner) {
                 return res.status(403).json({ error: 'Access denied' });
             }
         }
@@ -104,7 +109,7 @@ exports.updateCar = async (req, res) => {
             return res.status(404).json({ error: 'Car not found' });
         }
 
-        // Check ownership
+        // Check ownership using strict equality
         if (req.user.role !== 'admin' && car.seller_id !== req.user.id) {
             return res.status(403).json({ error: 'You can only edit your own listings' });
         }
@@ -113,6 +118,20 @@ exports.updateCar = async (req, res) => {
         
         // Handle image updates
         if (req.files && req.files.length > 0) {
+            // Delete old images if new ones are uploaded
+            if (car.images) {
+                try {
+                    const oldImages = JSON.parse(car.images);
+                    oldImages.forEach(image => {
+                        const imagePath = path.join(__dirname, '../uploads', image);
+                        if (fs.existsSync(imagePath)) {
+                            fs.unlinkSync(imagePath);
+                        }
+                    });
+                } catch (err) {
+                    console.error('Error deleting old images:', err);
+                }
+            }
             carData.images = JSON.stringify(req.files.map(f => f.filename));
         } else if (car.images) {
             carData.images = car.images;
@@ -141,7 +160,7 @@ exports.deleteCar = async (req, res) => {
             return res.status(404).json({ error: 'Car not found' });
         }
 
-        // Check ownership
+        // Check ownership using strict equality
         if (req.user.role !== 'admin' && car.seller_id !== req.user.id) {
             return res.status(403).json({ error: 'You can only delete your own listings' });
         }

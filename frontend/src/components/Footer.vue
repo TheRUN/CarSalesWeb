@@ -1,15 +1,24 @@
 <template>
   <footer class="footer">
     <div class="footer-container">
-      <p>&copy; 2024 Car Sales Web. All rights reserved.</p>
+      <p>&copy; {{ currentYear }} Car Sales Web. All rights reserved.</p>
       <p>Find your dream car with us!</p>
     </div>
   </footer>
 </template>
 
 <script>
+import { ref, onMounted } from 'vue';
+
 export default {
-  name: 'Footer'
+  name: 'Footer',
+  setup() {
+    const currentYear = ref(new Date().getFullYear());
+    
+    return {
+      currentYear
+    };
+  }
 };
 </script>
 
