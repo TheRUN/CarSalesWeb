@@ -55,8 +55,9 @@ CREATE TABLE IF NOT EXISTS inquiries (
 );
 
 -- Insert default admin user (password: admin123)
+-- Note: In production, change this password immediately after first login
 INSERT INTO users (username, email, password, role) VALUES 
-('admin', 'admin@carsales.com', '$2a$10$YQ7Y8Z8Z8Z8Z8Z8Z8Z8Z8uf5N5N5N5N5N5N5N5N5N5N5N5N5N5N5N', 'admin');
+('admin', 'admin@carsales.com', '$2a$10$8K1p/a0dL3.sDxkU5M3C9ufIv2qJPuOZKL1qv4hVQaVvz5kH5KL5G', 'admin');
 
 -- Sample data for cars (optional)
 INSERT INTO cars (seller_id, make, model, year, price, mileage, color, transmission, fuel_type, body_type, description, status) VALUES
